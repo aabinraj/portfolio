@@ -1738,10 +1738,50 @@ footer {
   color: var(--text-dim);
   font-family: var(--font-mono);
   letter-spacing: 0.5px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1rem;
+  line-height: 1.6;
 }
 
 .footer-copy span {
   color: #FFFFFF;
+}
+
+.footer-recruiter-hook {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-full);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.3px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.footer-recruiter-hook:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #FFFFFF;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.footer-recruiter-hook .recruiter-pulse-dot {
+  width: 6px;
+  height: 6px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #FFFFFF;
+  animation: pulse-glow 1.2s infinite alternate;
+  flex-shrink: 0;
 }
 
 /* Toast */
@@ -1959,7 +1999,7 @@ footer {
         <img src="abinraj.jpeg" alt="Abinraj Lalraj">
       </div>
       <div class="about-img-badge">
-        <span>3rd</span>
+        <span>4th</span>
         Year Student
       </div>
       <div class="about-decor"></div>
@@ -2321,7 +2361,7 @@ footer {
       <div class="timeline-content">
         <h3 class="timeline-title">B.E. Computer Engineering</h3>
         <div class="timeline-org">
-          <i class="fa-solid fa-graduation-cap"></i> Pillai College of Engineering · 3rd Year
+          <i class="fa-solid fa-graduation-cap"></i> Pillai College of Engineering · 4th Year
         </div>
         <p class="timeline-desc">
           Pursuing Bachelor of Engineering with dedicated focus on Artificial Intelligence, Machine Learning algorithms, Data Structures, and Computer Architecture. Engaged in hackathons, research explorations, and open-source software development.
@@ -2523,7 +2563,11 @@ footer {
     </a>
   </div>
   <p class="footer-copy">
-    &copy; 2026 <span>Abinraj Lalraj</span>. All Rights Reserved.
+    <span>&copy; 2026 Abinraj Lalraj. All Rights Reserved.</span>
+    <a href="mailto:abinrajlalraj165@gmail.com?subject=Opportunity%20Inquiry%20-%20Abinraj%20Lalraj" class="footer-recruiter-hook" title="Click to email Abinraj directly">
+      <span class="recruiter-pulse-dot"></span>
+      <span>Actively seeking Software Engineering &amp; AI/ML roles &bull; Ready to ship from Day 1</span>
+    </a>
   </p>
 </footer>
 

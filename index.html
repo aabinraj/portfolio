@@ -80,6 +80,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Restore default cursor on touch/mobile devices */
+@media (pointer: coarse), (hover: none), (max-width: 768px) {
+  body, body * {
+    cursor: auto !important;
+  }
+}
+
 ::selection {
   background: #FFFFFF;
   color: #000000;
@@ -1848,6 +1855,138 @@ footer {
   .about-stats { grid-template-columns: 1fr; }
   .projects-grid { grid-template-columns: 1fr; }
 }
+
+/* ==========================================================================
+   MOBILE & LOW-END DEVICE PERFORMANCE OPTIMIZATIONS
+   ========================================================================== */
+@media (pointer: coarse), (hover: none), (max-width: 768px) {
+  /* Hide custom cursor elements entirely */
+  #cursor-dot,
+  #cursor-circle {
+    display: none !important;
+  }
+
+  /* Hide scroll indicator */
+  .scroll-indicator {
+    display: none !important;
+  }
+
+  /* Disable canvas particle background (biggest perf killer) */
+  #bg-canvas {
+    display: none !important;
+  }
+
+  /* Disable noise overlay (GPU compositing layer) */
+  .noise-overlay {
+    display: none !important;
+  }
+
+  /* Drastically reduce ambient orb blur (140px blur is extremely GPU-heavy) */
+  .ambient-orb {
+    filter: blur(60px) !important;
+    opacity: 0.03 !important;
+  }
+
+  /* Disable backdrop-filter on nav (very GPU-heavy on mobile) */
+  nav.scrolled {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(5, 5, 5, 0.95) !important;
+  }
+
+  /* Disable hero badge backdrop-filter */
+  .hero-badge {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Disable backdrop-filter on secondary buttons */
+  .btn-secondary {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Disable mobile nav backdrop-filter */
+  .nav-links {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Disable floating icon animations (saves constant repaints) */
+  .tech-float {
+    animation: none !important;
+  }
+
+  /* Disable loader scanline animation */
+  .loader-scanline {
+    display: none !important;
+  }
+
+  /* Disable loader grid background */
+  .loader-bg-grid {
+    display: none !important;
+  }
+
+  /* Simplify scroll progress bar shadow */
+  #scroll-progress {
+    box-shadow: none !important;
+  }
+
+  /* Simplify timeline dot glow */
+  .timeline-dot {
+    box-shadow: none !important;
+  }
+
+  /* Disable hover transforms on cards (no hover on touch) */
+  .project-card:hover,
+  .cert-card:hover,
+  .skill-category:hover,
+  .stat-card:hover,
+  .timeline-content:hover {
+    transform: none !important;
+  }
+
+  /* Use simpler reveal animations */
+  .reveal,
+  .reveal-left,
+  .reveal-right {
+    transition-duration: 0.4s !important;
+  }
+
+  .reveal-left {
+    transform: translateY(20px) !important;
+  }
+  .reveal-left.visible {
+    transform: translateY(0) !important;
+  }
+
+  .reveal-right {
+    transform: translateY(20px) !important;
+  }
+  .reveal-right.visible {
+    transform: translateY(0) !important;
+  }
+
+  .reveal {
+    transform: translateY(20px) !important;
+  }
+  .reveal.visible {
+    transform: translateY(0) !important;
+  }
+
+  /* Reduce section padding for more content density */
+  section {
+    padding: 60px 5% !important;
+  }
+
+  /* Simplify button shadows */
+  .btn-primary {
+    box-shadow: none !important;
+  }
+  .btn-submit {
+    box-shadow: none !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -1977,10 +2116,6 @@ footer {
     </div>
   </div>
 
-  <div class="scroll-indicator">
-    <span>Scroll</span>
-    <div class="scroll-line"></div>
-  </div>
 </section>
 
 <!-- ==========================================================================
@@ -2695,69 +2830,53 @@ if (heroCipher) {
 }
 
 /* ==========================================================================
-   4. CUSTOM CURSOR (DIFFERENCE MODE)
+   4. CUSTOM CURSOR (DIFFERENCE MODE) — Disabled on touch/mobile
    ========================================================================== */
+const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia('(pointer: coarse)').matches);
+
 const cursorDot = document.getElementById('cursor-dot');
 const cursorCircle = document.getElementById('cursor-circle');
 let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
 let circleX = mouseX, circleY = mouseY;
 
-window.addEventListener('mousemove', e => {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-  cursorDot.style.left = mouseX + 'px';
-  cursorDot.style.top = mouseY + 'px';
-});
+if (!isTouchDevice) {
+  window.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    cursorDot.style.left = mouseX + 'px';
+    cursorDot.style.top = mouseY + 'px';
+  });
 
-document.querySelectorAll('a, button, input, textarea, .project-card, .skill-category, .cert-card, .tech-float, .stat-card, #hero-cipher').forEach(el => {
-  el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
-  el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
-});
+  document.querySelectorAll('a, button, input, textarea, .project-card, .skill-category, .cert-card, .tech-float, .stat-card, #hero-cipher').forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+  });
 
-(function animateFollower() {
-  circleX += (mouseX - circleX) * 0.15;
-  circleY += (mouseY - circleY) * 0.15;
-  cursorCircle.style.left = circleX + 'px';
-  cursorCircle.style.top = circleY + 'px';
-  requestAnimationFrame(animateFollower);
-})();
+  (function animateFollower() {
+    circleX += (mouseX - circleX) * 0.15;
+    circleY += (mouseY - circleY) * 0.15;
+    cursorCircle.style.left = circleX + 'px';
+    cursorCircle.style.top = circleY + 'px';
+    requestAnimationFrame(animateFollower);
+  })();
+} else {
+  // Hide cursor elements on touch devices
+  if (cursorDot) cursorDot.style.display = 'none';
+  if (cursorCircle) cursorCircle.style.display = 'none';
+  document.body.style.cursor = 'auto';
+}
 
 /* ==========================================================================
    5. INTERACTIVE SCROLL-REACTIVE BACKGROUND CANVAS
+      — Completely disabled on touch/mobile for performance
    ========================================================================== */
 const canvas = document.getElementById('bg-canvas');
-const ctx = canvas.getContext('2d');
-let width, height;
-let particles = [];
 let scrollY = window.scrollY;
 let targetScrollY = scrollY;
 let scrollVelocity = 0;
 let lastScrollY = scrollY;
 
-function resizeCanvas() {
-  width = canvas.width = window.innerWidth;
-  height = canvas.height = window.innerHeight;
-}
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
-
-// Generate sophisticated monochrome node particles
-const PARTICLE_COUNT = Math.min(Math.floor(window.innerWidth / 16), 85);
-for (let i = 0; i < PARTICLE_COUNT; i++) {
-  particles.push({
-    baseX: Math.random() * window.innerWidth,
-    baseY: Math.random() * window.innerHeight,
-    x: Math.random() * window.innerWidth,
-    y: Math.random() * window.innerHeight,
-    radius: Math.random() * 1.5 + 0.5,
-    vx: (Math.random() - 0.5) * 0.4,
-    vy: (Math.random() - 0.5) * 0.4,
-    depth: Math.random() * 0.8 + 0.2, // 3D parallax depth
-    alpha: Math.random() * 0.5 + 0.1
-  });
-}
-
-// Track scroll velocity for physics reaction
+// Track scroll for progress bar and nav — always active
 window.addEventListener('scroll', () => {
   targetScrollY = window.scrollY;
   const pct = targetScrollY / (document.body.scrollHeight - window.innerHeight) * 100;
@@ -2766,76 +2885,98 @@ window.addEventListener('scroll', () => {
   highlightNav();
 }, { passive: true });
 
-// Move ambient orbs on scroll
 const orb1 = document.getElementById('orb-1');
 const orb2 = document.getElementById('orb-2');
 
-function renderBackground() {
-  // Smooth scroll interpolation
-  scrollY += (targetScrollY - scrollY) * 0.1;
-  scrollVelocity = targetScrollY - lastScrollY;
-  lastScrollY = targetScrollY;
+if (!isTouchDevice) {
+  // Full canvas particle system — desktop only
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  let particles = [];
 
-  // Shift ambient orbs
-  if (orb1 && orb2) {
-    orb1.style.transform = `translateY(${scrollY * 0.12}px) scale(${1 + Math.sin(scrollY * 0.002) * 0.1})`;
-    orb2.style.transform = `translateY(${-scrollY * 0.08}px)`;
+  function resizeCanvas() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  const PARTICLE_COUNT = Math.min(Math.floor(window.innerWidth / 16), 85);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    particles.push({
+      baseX: Math.random() * window.innerWidth,
+      baseY: Math.random() * window.innerHeight,
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      radius: Math.random() * 1.5 + 0.5,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      depth: Math.random() * 0.8 + 0.2,
+      alpha: Math.random() * 0.5 + 0.1
+    });
   }
 
-  ctx.clearRect(0, 0, width, height);
+  function renderBackground() {
+    scrollY += (targetScrollY - scrollY) * 0.1;
+    scrollVelocity = targetScrollY - lastScrollY;
+    lastScrollY = targetScrollY;
 
-  // Draw reactive network
-  for (let i = 0; i < particles.length; i++) {
-    const p = particles[i];
-
-    // Physics update with scroll velocity impact
-    p.baseX += p.vx;
-    p.baseY += p.vy - (scrollVelocity * 0.05 * p.depth);
-
-    // Screen wrapping
-    if (p.baseX < 0) p.baseX = width;
-    if (p.baseX > width) p.baseX = 0;
-    if (p.baseY < 0) p.baseY = height;
-    if (p.baseY > height) p.baseY = 0;
-
-    // Mouse distance repulsion
-    const dx = mouseX - p.baseX;
-    const dy = mouseY - p.baseY;
-    const dist = Math.hypot(dx, dy);
-    let shiftX = 0, shiftY = 0;
-    if (dist < 120) {
-      const force = (1 - dist / 120) * 20;
-      shiftX = -(dx / dist) * force;
-      shiftY = -(dy / dist) * force;
+    if (orb1 && orb2) {
+      orb1.style.transform = `translateY(${scrollY * 0.12}px) scale(${1 + Math.sin(scrollY * 0.002) * 0.1})`;
+      orb2.style.transform = `translateY(${-scrollY * 0.08}px)`;
     }
 
-    p.x = p.baseX + shiftX;
-    p.y = p.baseY + shiftY;
+    ctx.clearRect(0, 0, width, height);
 
-    // Render node
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius * p.depth, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha * p.depth})`;
-    ctx.fill();
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.baseX += p.vx;
+      p.baseY += p.vy - (scrollVelocity * 0.05 * p.depth);
 
-    // Subtle line connections to neighbors
-    for (let j = i + 1; j < particles.length; j++) {
-      const p2 = particles[j];
-      const d = Math.hypot(p.x - p2.x, p.y - p2.y);
-      if (d < 110) {
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.strokeStyle = `rgba(255, 255, 255, ${0.07 * (1 - d / 110) * p.depth})`;
-        ctx.lineWidth = 0.6;
-        ctx.stroke();
+      if (p.baseX < 0) p.baseX = width;
+      if (p.baseX > width) p.baseX = 0;
+      if (p.baseY < 0) p.baseY = height;
+      if (p.baseY > height) p.baseY = 0;
+
+      const dx = mouseX - p.baseX;
+      const dy = mouseY - p.baseY;
+      const dist = Math.hypot(dx, dy);
+      let shiftX = 0, shiftY = 0;
+      if (dist < 120) {
+        const force = (1 - dist / 120) * 20;
+        shiftX = -(dx / dist) * force;
+        shiftY = -(dy / dist) * force;
+      }
+
+      p.x = p.baseX + shiftX;
+      p.y = p.baseY + shiftY;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius * p.depth, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha * p.depth})`;
+      ctx.fill();
+
+      for (let j = i + 1; j < particles.length; j++) {
+        const p2 = particles[j];
+        const d = Math.hypot(p.x - p2.x, p.y - p2.y);
+        if (d < 110) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = `rgba(255, 255, 255, ${0.07 * (1 - d / 110) * p.depth})`;
+          ctx.lineWidth = 0.6;
+          ctx.stroke();
+        }
       }
     }
-  }
 
-  requestAnimationFrame(renderBackground);
+    requestAnimationFrame(renderBackground);
+  }
+  renderBackground();
+} else {
+  // Mobile: hide canvas, skip all particle rendering
+  if (canvas) canvas.style.display = 'none';
 }
-renderBackground();
 
 /* ==========================================================================
    6. SCROLL REVEAL OBSERVER
@@ -3050,19 +3191,21 @@ function showToast(msg, success = true) {
 }
 
 /* ==========================================================================
-   10. CARD TILT 3D PARALLAX
+   10. CARD TILT 3D PARALLAX — Disabled on touch/mobile
    ========================================================================== */
-document.querySelectorAll('.project-card, .timeline-content').forEach(card => {
-  card.addEventListener('mousemove', e => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    card.style.transform = `translateY(-8px) perspective(1000px) rotateX(${-y / 30}deg) rotateY(${x / 30}deg)`;
+if (!isTouchDevice) {
+  document.querySelectorAll('.project-card, .timeline-content').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      card.style.transform = `translateY(-8px) perspective(1000px) rotateX(${-y / 30}deg) rotateY(${x / 30}deg)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
   });
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = '';
-  });
-});
+}
 </script>
 </body>
 </html>
